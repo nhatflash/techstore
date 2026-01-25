@@ -1,0 +1,25 @@
+package com.prm292.techstore.apis;
+
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class ApiResponse<T> {
+    private int statusCode;
+    private T value;
+
+    public static <T> ApiResponse<T> success(T value) {
+        return ApiResponse.<T>builder()
+                .statusCode(200)
+                .value(value)
+                .build();
+    }
+
+    public static <T> ApiResponse<T> created(T value) {
+        return ApiResponse.<T>builder()
+                .statusCode(201)
+                .value(value)
+                .build();
+    }
+}
