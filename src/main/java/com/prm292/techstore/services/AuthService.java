@@ -4,6 +4,7 @@ import com.prm292.techstore.common.constants.UserRole;
 import com.prm292.techstore.dtos.responses.SignInResponse;
 import com.prm292.techstore.dtos.responses.UserResponse;
 import com.prm292.techstore.exceptions.BadRequestException;
+import com.prm292.techstore.exceptions.NotFoundException;
 import com.prm292.techstore.exceptions.UnauthorizedAccessException;
 import com.prm292.techstore.common.mappers.ResponseMapper;
 import com.prm292.techstore.models.User;
@@ -62,6 +63,13 @@ public class AuthService {
         user.setRole(UserRole.Customer);
         userRepository.save(user);
         return ResponseMapper.mapToUserResponse(user);
+    }
+
+
+    public String HandleGetAccessToken(String refreshToken) {
+        String username = jwtUtils.getUsernameFromToken(refreshToken);
+        User user =  userRepository.findFirstByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
+        return jwtUtils.generateAccessToken(user.getUsername(), user.getEmail(), user.getRole());
     }
 
     private String setAuthenticationAndGetUsername(String login, String password) {

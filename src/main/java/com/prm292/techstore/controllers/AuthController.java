@@ -1,6 +1,7 @@
 package com.prm292.techstore.controllers;
 
 import com.prm292.techstore.apis.ApiResponse;
+import com.prm292.techstore.dtos.requests.AccessTokenRequest;
 import com.prm292.techstore.dtos.requests.SignInRequest;
 import com.prm292.techstore.dtos.requests.SignUpRequest;
 import com.prm292.techstore.dtos.responses.SignInResponse;
@@ -32,5 +33,11 @@ public class AuthController {
     public ResponseEntity<ApiResponse<UserResponse>> SignUpCustomer(@RequestBody @Valid SignUpRequest request) {
         UserResponse response = authService.HandleSignUpCustomer(request.getUsername(), request.getPassword(), request.getConfirmPassword(), request.getEmail(), request.getPhoneNumber(), request.getAddress());
         return ResponseEntity.ok(ApiResponse.created(response));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<String>> GetAccessToken(@RequestBody @Valid AccessTokenRequest request) {
+        String accessToken = authService.HandleGetAccessToken(request.getRefreshToken());
+        return ResponseEntity.ok(ApiResponse.success(accessToken));
     }
 }
