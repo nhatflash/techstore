@@ -19,9 +19,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     public @NullMarked UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user;
         if (username.contains("@")) {
-            user = userRepository.findFirstByEmail(username).orElseThrow(() -> new UsernameNotFoundException("Invalid credentials."));
+            user = userRepository.findFirstByEmailIgnoreCase(username).orElseThrow(() -> new UsernameNotFoundException("Invalid credentials."));
         } else {
-            user = userRepository.findFirstByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Invalid credentials."));
+            user = userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(() -> new UsernameNotFoundException("Invalid credentials."));
         }
         return CustomUserDetails.create(user);
     }

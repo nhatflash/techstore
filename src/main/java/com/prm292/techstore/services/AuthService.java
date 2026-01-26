@@ -33,7 +33,7 @@ public class AuthService {
 
     public SignInResponse HandleSignIn(String login, String password) {
         String authenticatedUsername = setAuthenticationAndGetUsername(login, password);
-        User user = userRepository.findFirstByUsername(authenticatedUsername).orElseThrow(() -> new UnauthorizedAccessException("Invalid credentials."));
+        User user = userRepository.findFirstByUsernameIgnoreCase(authenticatedUsername).orElseThrow(() -> new UnauthorizedAccessException("Invalid credentials."));
 
         String accessToken = jwtUtils.generateAccessToken(user.getUsername(), user.getEmail(), user.getRole());
         String refreshToken = jwtUtils.generateRefreshToken(user.getUsername());
@@ -42,10 +42,10 @@ public class AuthService {
     }
 
     public UserResponse HandleSignUpCustomer(String username, String password, String confirmPassword, String email, String phoneNumber, String address) {
-        if (userRepository.existsByUsername(username)) {
+        if (userRepository.existsByUsernameIgnoreCase(username)) {
             throw new BadRequestException("Username is already in use");
         }
-        if (email != null && userRepository.existsByEmail(email)) {
+        if (email != null && userRepository.existsByEmailIgnoreCase(email)) {
             throw new BadRequestException("Email is already in use");
         }
         if (phoneNumber != null && userRepository.existsByPhoneNumber(phoneNumber)) {
@@ -68,7 +68,7 @@ public class AuthService {
 
     public String HandleGetAccessToken(String refreshToken) {
         String username = jwtUtils.getUsernameFromToken(refreshToken);
-        User user =  userRepository.findFirstByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
+        User user =  userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(() -> new NotFoundException("User not found"));
         return jwtUtils.generateAccessToken(user.getUsername(), user.getEmail(), user.getRole());
     }
 
