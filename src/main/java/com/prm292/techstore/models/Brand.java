@@ -13,14 +13,13 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "categories")
-public class Category {
+@Table(name = "brands")
+public class Brand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id", nullable = false)
+    @Column(name = "brand_id", nullable = false)
     private Integer id;
 
-    @Column(name = "category_name", nullable = false, length = 100, unique = true)
-    private String categoryName;
-
+    @Column(name = "brand_name", nullable = false, length = 100, unique = true)
+    private String brandName;
 }

@@ -13,14 +13,17 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "categories")
-public class Category {
+@Table(name = "product_images")
+public class ProductImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id", nullable = false)
+    @Column(name = "image_id", nullable = false)
     private Integer id;
 
-    @Column(name = "category_name", nullable = false, length = 100, unique = true)
-    private String categoryName;
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 }

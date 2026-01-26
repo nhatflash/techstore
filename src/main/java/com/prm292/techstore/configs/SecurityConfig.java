@@ -60,7 +60,12 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/auth/**"
+                                "/api/auth/**",
+                                "/api/products/**",
+                                "/api/categories",
+                                "/api/categories/search",
+                                "/api/brands",
+                                "/api/brands/search"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider(customUserDetailsService, passwordEncoder()))
