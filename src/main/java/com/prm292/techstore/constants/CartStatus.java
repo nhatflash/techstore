@@ -1,4 +1,4 @@
-package com.prm292.techstore.common.constants;
+package com.prm292.techstore.constants;
 
 public class CartStatus {
     public static final String Processing = "Processing";

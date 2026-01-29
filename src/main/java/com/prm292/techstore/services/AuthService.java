@@ -1,6 +1,6 @@
 package com.prm292.techstore.services;
 
-import com.prm292.techstore.common.constants.UserRole;
+import com.prm292.techstore.constants.UserRole;
 import com.prm292.techstore.dtos.responses.SignInResponse;
 import com.prm292.techstore.dtos.responses.UserResponse;
 import com.prm292.techstore.exceptions.BadRequestException;
