@@ -1,8 +1,15 @@
 package com.prm292.techstore.common.mappers;
 
+import com.prm292.techstore.dtos.responses.CartItemResponse;
+import com.prm292.techstore.dtos.responses.CartResponse;
 import com.prm292.techstore.dtos.responses.SignInResponse;
 import com.prm292.techstore.dtos.responses.UserResponse;
+import com.prm292.techstore.models.Cart;
+import com.prm292.techstore.models.CartItem;
 import com.prm292.techstore.models.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ResponseMapper {
@@ -23,5 +30,33 @@ public class ResponseMapper {
                 .phoneNumber(user.getPhoneNumber())
                 .address(user.getAddress())
                 .build();
+    }
+
+    public static CartResponse mapToCartResponse(Cart cart, List<CartItem> items) {
+        return new CartResponse(
+                cart.getId(),
+                cart.getUser().getId(),
+                mapToCartItemResponseList(items),
+                cart.getTotalPrice()
+        );
+    }
+
+    public static CartItemResponse mapToCartItemResponse(CartItem item) {
+        return new CartItemResponse(
+                item.getId(),
+                item.getCart().getId(),
+                item.getProduct().getProductName(),
+                item.getProduct().getPrimaryImageUrl(),
+                item.getQuantity(),
+                item.getPrice()
+        );
+    }
+
+    public static List<CartItemResponse> mapToCartItemResponseList(List<CartItem> items) {
+        List<CartItemResponse> responses = new ArrayList<>();
+        for (CartItem item : items) {
+            responses.add(mapToCartItemResponse(item));
+        }
+        return responses;
     }
 }

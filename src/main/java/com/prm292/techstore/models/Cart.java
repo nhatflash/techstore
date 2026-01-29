@@ -16,6 +16,10 @@ public class Cart {
     @Column(name = "cart_id", nullable = false)
     private Integer id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Column(name = "total_price", nullable = false, precision = 18, scale = 2)
     private BigDecimal totalPrice;
 

@@ -8,6 +8,7 @@ import com.prm292.techstore.repositories.BrandRepository;
 import com.prm292.techstore.repositories.CategoryRepository;
 import com.prm292.techstore.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,7 @@ public class DataInitializer implements CommandLineRunner {
     private final BrandRepository brandRepository;
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String @NonNull ... args) throws Exception {
         if (productRepository.count() > 0) {
             return; // Data already initialized
         }
