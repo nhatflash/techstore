@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ public class CartController {
 
 
     @PostMapping
+    @PreAuthorize("hasRole('Customer')")
     public ResponseEntity<ApiResponse<CartResponse>> AddProductToCart(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid ManageProductToCartRequest request) {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");
@@ -33,6 +35,7 @@ public class CartController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('Customer')")
     public ResponseEntity<ApiResponse<CartResponse>> GetUserCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");
@@ -42,6 +45,7 @@ public class CartController {
     }
 
     @PatchMapping
+    @PreAuthorize("hasRole('Customer')")
     public ResponseEntity<ApiResponse<CartResponse>> AdjustProductQuantityInCart(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid ManageProductToCartRequest request) {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");
@@ -51,6 +55,7 @@ public class CartController {
     }
 
     @DeleteMapping("/{cartItemId}")
+    @PreAuthorize("hasRole('Customer')")
     public ResponseEntity<ApiResponse<CartResponse>> RemoveProductFromCart(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable int cartItemId) {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");
@@ -61,6 +66,7 @@ public class CartController {
 
 
     @DeleteMapping
+    @PreAuthorize("hasRole('Customer')")
     public ResponseEntity<ApiResponse<CartResponse>> RemoveEntireCart(@AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");

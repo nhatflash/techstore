@@ -1,11 +1,9 @@
 package com.prm292.techstore.common.mappers;
 
-import com.prm292.techstore.dtos.responses.CartItemResponse;
-import com.prm292.techstore.dtos.responses.CartResponse;
-import com.prm292.techstore.dtos.responses.SignInResponse;
-import com.prm292.techstore.dtos.responses.UserResponse;
+import com.prm292.techstore.dtos.responses.*;
 import com.prm292.techstore.models.Cart;
 import com.prm292.techstore.models.CartItem;
+import com.prm292.techstore.models.Order;
 import com.prm292.techstore.models.User;
 
 import java.util.ArrayList;
@@ -58,5 +56,16 @@ public class ResponseMapper {
             responses.add(mapToCartItemResponse(item));
         }
         return responses;
+    }
+
+    public static OrderResponse mapToOrderResponse(Order order) {
+        return new OrderResponse(
+                order.getId(),
+                order.getCart().getId(),
+                order.getPaymentMethod(),
+                order.getBillingAddress(),
+                order.getOrderStatus(),
+                order.getOrderDate()
+        );
     }
 }
