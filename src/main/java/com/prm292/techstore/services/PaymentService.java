@@ -45,7 +45,7 @@ public class PaymentService {
         }
         if (order.getPaymentMethod().equals(PaymentMethod.VnPay)) {
             Map<String, String> vnpParams = vnPayService.getVnpParams(request, order);
-            return vnpParams.get("paymentUrl");
+            return vnPayService.getQueryUrl(vnpParams);
         }
         throw new BadRequestException("Invalid payment method.");
     }
