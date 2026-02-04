@@ -37,7 +37,7 @@ public class PaymentService {
         if (!cart.getUser().getId().equals(user.getId())) {
             throw new ForbiddenException("This order does not belong to this user.");
         }
-        if (cart.getStatus().equals(CartStatus.Paid) || !order.getOrderStatus().equals(OrderStatus.Pending)) {
+        if (!order.getOrderStatus().equals(OrderStatus.Pending)) {
             throw new BadRequestException("This order is already paid.");
         }
         if (orderRepository.existsByCartAndOrderStatusNot(cart, OrderStatus.Pending)) {
