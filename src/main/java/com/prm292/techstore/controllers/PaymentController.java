@@ -5,6 +5,7 @@ import com.prm292.techstore.exceptions.UnauthorizedAccessException;
 import com.prm292.techstore.services.PaymentService;
 import com.prm292.techstore.userdetails.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ public class PaymentController {
 
     @GetMapping("/{orderId}")
     @PreAuthorize("hasRole('Customer')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<ApiResponse<String>> getPaymentUrl(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable int orderId, HttpServletRequest request) {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in");
