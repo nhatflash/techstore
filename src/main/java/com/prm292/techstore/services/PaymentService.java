@@ -24,10 +24,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final VnPayService  vnPayService;
+    private final PayOsService payOsService;
 
     @Transactional(readOnly = true)
     public String handleGetPaymentUrl(String username, Integer orderId, HttpServletRequest request) {
@@ -43,9 +43,12 @@ public class PaymentService {
         if (orderRepository.existsByCartAndOrderStatusNot(cart, OrderStatus.Pending)) {
             throw new BadRequestException("The cart for this order is containing a paid order.");
         }
-        if (order.getPaymentMethod().equals(PaymentMethod.VnPay)) {
-            Map<String, String> vnpParams = vnPayService.getVnpParams(request, order);
-            return vnPayService.getQueryUrl(vnpParams);
+        switch (order.getPaymentMethod()) {
+            case PaymentMethod.VnPay:
+                Map<String, String> vnpParams = vnPayService.getVnpParams(request, order);
+                return vnPayService.getQueryUrl(vnpParams);
+            case PaymentMethod.PayOs:
+                return payOsService.createPaymentLinkRequest(order);
         }
         throw new BadRequestException("Invalid payment method.");
     }
