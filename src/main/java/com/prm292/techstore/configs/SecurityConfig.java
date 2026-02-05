@@ -65,7 +65,8 @@ public class SecurityConfig {
                                 "/api/categories",
                                 "/api/categories/search",
                                 "/api/brands",
-                                "/api/brands/search"
+                                "/api/brands/search",
+                                "api/payments/payos-webhook"
                         ).permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider(customUserDetailsService, passwordEncoder()))
