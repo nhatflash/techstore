@@ -30,6 +30,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
 	implementation 'tools.jackson.core:jackson-databind:3.0.4'
+	implementation 'me.paulschwarz:spring-dotenv:5.1.0'
 	implementation 'tools.jackson.core:jackson-core:3.0.4'
 	implementation 'org.bouncycastle:bcprov-jdk18on:1.83'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'

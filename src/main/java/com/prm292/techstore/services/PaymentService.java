@@ -1,7 +1,4 @@
 package com.prm292.techstore.services;
-
-
-import com.prm292.techstore.constants.CartStatus;
 import com.prm292.techstore.constants.OrderStatus;
 import com.prm292.techstore.constants.PaymentMethod;
 import com.prm292.techstore.exceptions.BadRequestException;
@@ -11,7 +8,6 @@ import com.prm292.techstore.models.Cart;
 import com.prm292.techstore.models.Order;
 import com.prm292.techstore.models.User;
 import com.prm292.techstore.repositories.OrderRepository;
-import com.prm292.techstore.repositories.PaymentRepository;
 import com.prm292.techstore.repositories.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

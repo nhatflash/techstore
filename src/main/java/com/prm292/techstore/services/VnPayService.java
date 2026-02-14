@@ -3,7 +3,6 @@ package com.prm292.techstore.services;
 import com.prm292.techstore.exceptions.BadRequestException;
 import com.prm292.techstore.exceptions.NotFoundException;
 import com.prm292.techstore.models.Order;
-import com.prm292.techstore.repositories.PaymentRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

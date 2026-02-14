@@ -1,6 +1,4 @@
 package com.prm292.techstore.apis;
-
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

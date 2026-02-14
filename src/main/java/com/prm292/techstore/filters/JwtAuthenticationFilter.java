@@ -2,7 +2,6 @@ package com.prm292.techstore.filters;
 
 import com.prm292.techstore.userdetails.CustomUserDetailsService;
 import com.prm292.techstore.utils.JwtUtils;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

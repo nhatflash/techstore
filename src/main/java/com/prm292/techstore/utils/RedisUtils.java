@@ -1,6 +1,4 @@
 package com.prm292.techstore.utils;
-
-import com.prm292.techstore.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
