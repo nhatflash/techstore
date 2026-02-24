@@ -39,6 +39,6 @@ public class OrderService {
         cart.setStatus(CartStatus.Paid);
         cartRepository.save(cart);
 
-        return ResponseMapper.mapToOrderResponse(order);
+        return ResponseMapper.mapToOrderResponse(order, cart.getId());
     }
 }

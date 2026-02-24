@@ -4,6 +4,7 @@ import com.prm292.techstore.dtos.responses.*;
 import com.prm292.techstore.models.Cart;
 import com.prm292.techstore.models.CartItem;
 import com.prm292.techstore.models.Order;
+import com.prm292.techstore.models.Payment;
 import com.prm292.techstore.models.User;
 
 import java.util.ArrayList;
@@ -34,15 +35,15 @@ public class ResponseMapper {
         return new CartResponse(
                 cart.getId(),
                 cart.getUser().getId(),
-                mapToCartItemResponseList(items),
+                mapToCartItemResponseList(items, cart.getId()),
                 cart.getTotalPrice()
         );
     }
 
-    public static CartItemResponse mapToCartItemResponse(CartItem item) {
+    public static CartItemResponse mapToCartItemResponse(CartItem item, int cartId) {
         return new CartItemResponse(
                 item.getId(),
-                item.getCart().getId(),
+                cartId,
                 item.getProduct().getProductName(),
                 item.getProduct().getPrimaryImageUrl(),
                 item.getQuantity(),
@@ -50,22 +51,40 @@ public class ResponseMapper {
         );
     }
 
-    public static List<CartItemResponse> mapToCartItemResponseList(List<CartItem> items) {
+    public static List<CartItemResponse> mapToCartItemResponseList(List<CartItem> items, int cartId) {
         List<CartItemResponse> responses = new ArrayList<>();
         for (CartItem item : items) {
-            responses.add(mapToCartItemResponse(item));
+            responses.add(mapToCartItemResponse(item, cartId));
         }
         return responses;
     }
 
-    public static OrderResponse mapToOrderResponse(Order order) {
+    public static OrderResponse mapToOrderResponse(Order order, int cartId) {
         return new OrderResponse(
                 order.getId(),
-                order.getCart().getId(),
+                cartId,
                 order.getPaymentMethod(),
                 order.getBillingAddress(),
                 order.getOrderStatus(),
                 order.getOrderDate()
+        );
+    }
+
+    public static PaymentResponse mapToPaymentResponse(Payment payment, int orderId) {
+        return new PaymentResponse(
+            payment.getId(),
+            orderId,
+            payment.getAmount(),
+            payment.getPaymentDate(),
+            payment.getPaymentStatus()
+        );
+    }
+
+    public static OrderSummaryResponse mapToOrderSummaryResponse(Payment payment, Order order, List<CartItem> cartItems, int cartId) {
+        return new OrderSummaryResponse(
+            mapToOrderResponse(order, cartId),
+            mapToCartItemResponseList(cartItems, cartId),
+            mapToPaymentResponse(payment, order.getId())
         );
     }
 }

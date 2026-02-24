@@ -1,6 +1,7 @@
 package com.prm292.techstore.controllers;
 
 import com.prm292.techstore.apis.ApiResponse;
+import com.prm292.techstore.dtos.responses.OrderSummaryResponse;
 import com.prm292.techstore.exceptions.UnauthorizedAccessException;
 import com.prm292.techstore.services.PayOsService;
 import com.prm292.techstore.services.PaymentService;
@@ -33,9 +34,19 @@ public class PaymentController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @PostMapping("payos-webhook")
+    @PostMapping("/payos-webhook")
     public ResponseEntity<String> payOsWebhook(@RequestBody Webhook webhook) {
         payOsService.handleWebhook(webhook);
         return ResponseEntity.ok("Webhook received");
+    }
+
+    @GetMapping("/{paymentId}")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<ApiResponse<OrderSummaryResponse>> getOrderSummary(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Integer paymentId) {
+        if (userDetails == null) {
+            throw new UnauthorizedAccessException("User is not logged in.");
+        }
+        OrderSummaryResponse response = paymentService.handleGetOrderSummary(userDetails.getUsername(), paymentId);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
