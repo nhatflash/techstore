@@ -32,6 +32,7 @@ public class CartService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final CartItemRepository cartItemRepository;
+    private final NotificationService notificationService;
 
 
     @Transactional
@@ -69,6 +70,7 @@ public class CartService {
         cartItemRepository.save(cartItem);
 
         List<CartItem> cartItems = cartItemRepository.findByCartId(userProcessingCart.getId());
+        notificationService.updateCartBadge(username, cartItems.size());
 
         return ResponseMapper.mapToCartResponse(userProcessingCart, cartItems);
     }
@@ -103,6 +105,8 @@ public class CartService {
         cartRepository.save(userCart);
 
         List<CartItem> cartItems = cartItemRepository.findByCartId(userCart.getId());
+        notificationService.updateCartBadge(username, cartItems.size());
+
         return ResponseMapper.mapToCartResponse(userCart, cartItems);
     }
 
@@ -121,6 +125,8 @@ public class CartService {
         cartRepository.save(userCart);
         cartItemRepository.delete(cartItem);
         List<CartItem> cartItems = cartItemRepository.findByCartId(userCart.getId());
+        notificationService.updateCartBadge(username, cartItems.size());
+
         return ResponseMapper.mapToCartResponse(userCart, cartItems);
     }
 
@@ -133,6 +139,8 @@ public class CartService {
         userCart.setTotalPrice(new BigDecimal("0.00"));
         cartItemRepository.deleteAll(cartItems);
         cartRepository.save(userCart);
+        notificationService.updateCartBadge(username, 0);
+
         return ResponseMapper.mapToCartResponse(userCart, new ArrayList<>());
     }
 }

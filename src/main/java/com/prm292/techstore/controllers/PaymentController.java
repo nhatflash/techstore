@@ -40,7 +40,7 @@ public class PaymentController {
         return ResponseEntity.ok("Webhook received");
     }
 
-    @GetMapping("/{paymentId}")
+    @GetMapping("/summary/{paymentId}")
     @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<ApiResponse<OrderSummaryResponse>> getOrderSummary(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Integer paymentId) {
         if (userDetails == null) {
