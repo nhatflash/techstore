@@ -102,11 +102,17 @@ public class ChatController {
 
     @GetMapping("/rooms/{roomId}/messages")
     public ResponseEntity<ApiResponse<PageResponse<ChatMessageResponse>>> getMessages(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer roomId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        if (userDetails == null) {
+            throw new UnauthorizedAccessException("User is not logged in.");
+        }
+        User user = userRepository.findFirstByUsernameIgnoreCase(userDetails.getUsername())
+                .orElseThrow(() -> new UnauthorizedAccessException("User not found."));
         Pageable pageable = PageRequest.of(page, size);
-        PageResponse<ChatMessageResponse> response = chatService.getMessages(roomId, pageable);
+        PageResponse<ChatMessageResponse> response = chatService.getMessages(roomId, user, pageable);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -138,8 +144,14 @@ public class ChatController {
 
     @GetMapping("/messages/{messageId}/status")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getMessageReadStatus(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Integer messageId) {
-        ChatMessageResponse msg = chatService.getMessageById(messageId);
+        if (userDetails == null) {
+            throw new UnauthorizedAccessException("User is not logged in.");
+        }
+        User user = userRepository.findFirstByUsernameIgnoreCase(userDetails.getUsername())
+                .orElseThrow(() -> new UnauthorizedAccessException("User not found."));
+        ChatMessageResponse msg = chatService.getMessageById(messageId, user);
         var result = new java.util.HashMap<String, Object>();
         result.put("messageId", msg.getMessageId());
         result.put("isRead", msg.getIsRead());

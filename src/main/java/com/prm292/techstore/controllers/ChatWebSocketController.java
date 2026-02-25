@@ -28,6 +28,7 @@ public class ChatWebSocketController {
     @MessageMapping("/chat.send")
     public void sendMessage(@Payload SendMessageRequest request, Principal principal) {
         User sender = getUser(principal);
+        // sendMessage now validates room access internally
         ChatMessageResponse response = chatService.sendMessage(sender.getId(), request.getRoomId(), request.getMessage());
 
         // Broadcast to the room
@@ -45,6 +46,8 @@ public class ChatWebSocketController {
     @MessageMapping("/chat.typing")
     public void typing(@Payload TypingEvent event, Principal principal) {
         User sender = getUser(principal);
+        // Validate room access before broadcasting typing event
+        chatService.validateRoomAccess(event.getRoomId(), sender);
         messagingTemplate.convertAndSend("/topic/room." + event.getRoomId() + ".typing", (Object) Map.of(
                 "username", sender.getUsername(),
                 "isTyping", event.getIsTyping()
@@ -67,6 +70,7 @@ public class ChatWebSocketController {
     public void markAsRead(@Payload Map<String, Integer> payload, Principal principal) {
         User user = getUser(principal);
         Integer roomId = payload.get("roomId");
+        // markAsRead now validates room access internally
         int count = chatService.markAsRead(roomId, user.getId());
         messagingTemplate.convertAndSend("/topic/room." + roomId + ".read", (Object) Map.of(
                 "roomId", roomId,

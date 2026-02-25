@@ -1,10 +1,12 @@
 package com.prm292.techstore.services;
 
 import com.prm292.techstore.constants.MessageStatus;
+import com.prm292.techstore.constants.UserRole;
 import com.prm292.techstore.dtos.responses.ChatMessageResponse;
 import com.prm292.techstore.dtos.responses.ChatRoomResponse;
 import com.prm292.techstore.dtos.responses.PageResponse;
 import com.prm292.techstore.exceptions.NotFoundException;
+import com.prm292.techstore.exceptions.UnauthorizedAccessException;
 import com.prm292.techstore.models.ChatMessage;
 import com.prm292.techstore.models.ChatRoom;
 import com.prm292.techstore.models.User;
@@ -37,17 +39,16 @@ public class ChatService {
                 });
     }
 
-    public PageResponse<ChatMessageResponse> getMessages(Integer roomId, Pageable pageable) {
-        Page<ChatMessage> page = chatMessageRepository.findByChatRoom_IdOrderBySentAtDesc(roomId, pageable);
-        return new PageResponse<>(
-                page.getContent().stream().map(this::toMessageResponse).toList(),
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalElements(),
-                page.getTotalPages(),
-                page.isFirst(),
-                page.isLast()
-        );
+    /**
+     * Validates that the given user has access to the specified room.
+     * Admin can access any room. Customer can only access their own room.
+     */
+    public void validateRoomAccess(Integer roomId, User user) {
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new NotFoundException("Chat room not found"));
+        if (!UserRole.Admin.equals(user.getRole()) && !room.getClient().getId().equals(user.getId())) {
+            throw new UnauthorizedAccessException("You do not have access to this chat room.");
+        }
     }
 
     @Transactional
@@ -56,6 +57,11 @@ public class ChatService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
         ChatRoom room = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new NotFoundException("Chat room not found"));
+
+        // Enforce room access: Customer can only send to their own room
+        if (!UserRole.Admin.equals(sender.getRole()) && !room.getClient().getId().equals(sender.getId())) {
+            throw new UnauthorizedAccessException("You do not have access to this chat room.");
+        }
 
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setSender(sender);
@@ -70,16 +76,37 @@ public class ChatService {
 
     @Transactional
     public int markAsRead(Integer roomId, Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        validateRoomAccess(roomId, user);
         return chatMessageRepository.markAllAsRead(roomId, userId);
     }
 
     public long getUnreadCount(Integer roomId, Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        validateRoomAccess(roomId, user);
         return chatMessageRepository.countByChatRoom_IdAndIsReadFalseAndSender_IdNot(roomId, userId);
     }
 
-    public ChatMessageResponse getMessageById(Integer messageId) {
+    public PageResponse<ChatMessageResponse> getMessages(Integer roomId, User requestingUser, Pageable pageable) {
+        validateRoomAccess(roomId, requestingUser);
+        Page<ChatMessage> page = chatMessageRepository.findByChatRoom_IdOrderBySentAtDesc(roomId, pageable);
+        return new PageResponse<>(
+                page.getContent().stream().map(this::toMessageResponse).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages(),
+                page.isFirst(),
+                page.isLast()
+        );
+    }
+
+    public ChatMessageResponse getMessageById(Integer messageId, User requestingUser) {
         ChatMessage msg = chatMessageRepository.findById(messageId)
                 .orElseThrow(() -> new NotFoundException("Message not found"));
+        validateRoomAccess(msg.getChatRoom().getId(), requestingUser);
         return toMessageResponse(msg);
     }
 
