@@ -1,15 +1,19 @@
 package com.prm292.techstore.configs;
 
+import com.prm292.techstore.constants.UserRole;
 import com.prm292.techstore.models.Brand;
 import com.prm292.techstore.models.Category;
 import com.prm292.techstore.models.Product;
 import com.prm292.techstore.models.ProductImage;
+import com.prm292.techstore.models.User;
 import com.prm292.techstore.repositories.BrandRepository;
 import com.prm292.techstore.repositories.CategoryRepository;
 import com.prm292.techstore.repositories.ProductRepository;
+import com.prm292.techstore.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -23,14 +27,40 @@ public class DataInitializer implements CommandLineRunner {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String @NonNull ... args) throws Exception {
+        // Initialize admin account first
+        initializeAdminAccount();
+
         if (productRepository.count() > 0) {
             return; // Data already initialized
         }
 
         initializeData();
+    }
+
+    private void initializeAdminAccount() {
+        // Check if admin already exists
+        if (userRepository.existsByUsernameIgnoreCase("admin")) {
+            return;
+        }
+
+        User admin = new User();
+        admin.setUsername("admin");
+        admin.setPasswordHash(passwordEncoder.encode("admin123"));
+        admin.setEmail("admin@techstore.com");
+        admin.setPhoneNumber("0123456789");
+        admin.setAddress("Tech Store HQ");
+        admin.setRole(UserRole.Admin);
+
+        userRepository.save(admin);
+        System.out.println("✓ Admin account created successfully!");
+        System.out.println("  Username: admin");
+        System.out.println("  Password: admin123");
+        System.out.println("  Email: admin@techstore.com");
     }
 
     private void initializeData() {
