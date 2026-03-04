@@ -32,7 +32,9 @@ public class OrderService {
         Order order = new Order();
         order.setCart(cart);
         order.setPaymentMethod(request.getPaymentMethod());
-        order.setBillingAddress(request.getBillingAddress());
+        order.setBillingFullName(request.getBillingFullName().trim());
+        order.setBillingPhone(request.getBillingPhone().trim());
+        order.setBillingAddress(request.getBillingAddress().trim());
         order.setOrderStatus(OrderStatus.Pending);
         orderRepository.save(order);
 

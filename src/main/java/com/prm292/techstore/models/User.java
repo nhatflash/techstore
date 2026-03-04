@@ -26,6 +26,9 @@ public class User {
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
 
+    @Column(name = "full_name", length = 256)
+    private String fullName;
+
     @Column(name = "address")
     private String address;
 

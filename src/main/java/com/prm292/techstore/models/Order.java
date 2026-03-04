@@ -24,6 +24,12 @@ public class Order {
     @Column(name = "payment_method", nullable = false, length = 50)
     private String paymentMethod;
 
+    @Column(name = "billing_full_name", nullable = false)
+    private String billingFullName;
+
+    @Column(name = "billing_phone", nullable = false, length = 15)
+    private String billingPhone;
+
     @Column(name = "billing_address", nullable = false)
     private String billingAddress;
 

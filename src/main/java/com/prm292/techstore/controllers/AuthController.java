@@ -31,7 +31,7 @@ public class AuthController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<ApiResponse<UserResponse>> SignUpCustomer(@RequestBody @Valid SignUpRequest request) {
-        UserResponse response = authService.HandleSignUpCustomer(request.getUsername(), request.getPassword(), request.getConfirmPassword(), request.getEmail(), request.getPhoneNumber(), request.getAddress());
+        UserResponse response = authService.HandleSignUpCustomer(request.getUsername(), request.getPassword(), request.getConfirmPassword(), request.getEmail(), request.getFullName(), request.getPhoneNumber(), request.getAddress());
         return ResponseEntity.ok(ApiResponse.created(response));
     }
 

@@ -29,6 +29,9 @@ public class SignUpRequest {
     @Size(max = 100, message = "Email must not exceed 100 characters.")
     private String email;
 
+    @Size(max = 256, message = "Full name must not exceed 256 characters.")
+    private String fullName;
+
     @Pattern(regexp = GlobalPattern.PhonePattern, message = "Invalid phone number.")
     @Size(max = 15, message = "Phone number must not exceed 15 characters.")
     private String phoneNumber;

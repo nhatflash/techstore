@@ -41,7 +41,7 @@ public class AuthService {
         return ResponseMapper.mapToSignInResponse(accessToken, refreshToken);
     }
 
-    public UserResponse HandleSignUpCustomer(String username, String password, String confirmPassword, String email, String phoneNumber, String address) {
+    public UserResponse HandleSignUpCustomer(String username, String password, String confirmPassword, String email, String fullName, String phoneNumber, String address) {
         if (userRepository.existsByUsernameIgnoreCase(username)) {
             throw new BadRequestException("Username is already in use");
         }
@@ -59,6 +59,7 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setEmail(email);
         user.setPhoneNumber(phoneNumber);
+        user.setFullName(fullName);
         user.setAddress(address);
         user.setRole(UserRole.Customer);
         userRepository.save(user);
