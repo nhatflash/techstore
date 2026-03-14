@@ -86,8 +86,9 @@ public class PayOsService {
                 payment.setAmount(order.getCart().getTotalPrice());
                 payment.setPaymentStatus("Success");
                 payment.setOrder(order);
-                paymentRepository.save(payment);
-                redisUtils.removeItem(orderKey);
+                Payment newPayment = paymentRepository.save(payment);
+                String paymentKey = "payment-" + verifiedData.getOrderCode() + ":";
+                redisUtils.saveIntToString(paymentKey, newPayment.getId());
             }
         }
     }

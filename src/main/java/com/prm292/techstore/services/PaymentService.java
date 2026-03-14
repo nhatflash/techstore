@@ -15,6 +15,7 @@ import com.prm292.techstore.repositories.CartItemRepository;
 import com.prm292.techstore.repositories.OrderRepository;
 import com.prm292.techstore.repositories.PaymentRepository;
 import com.prm292.techstore.repositories.UserRepository;
+import com.prm292.techstore.utils.RedisUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class PaymentService {
     private final UserRepository userRepository;
     private final VnPayService  vnPayService;
     private final PayOsService payOsService;
+    private final RedisUtils redisUtils;
 
     @Transactional(readOnly = true)
     public String handleGetPaymentUrl(String username, Integer orderId, HttpServletRequest request) {
@@ -58,7 +60,9 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public OrderSummaryResponse handleGetOrderSummary(String username, int paymentId) {
+    public OrderSummaryResponse handleGetOrderSummary(String username, String orderCode) {
+        String paymentKey = "payment-" + orderCode + ":";
+        Integer paymentId = redisUtils.getIntFromString(paymentKey);
         Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new NotFoundException("No payment found."));
         Order order = payment.getOrder();
         Cart cart = order.getCart();
@@ -66,6 +70,7 @@ public class PaymentService {
             throw new ForbiddenException("The payment for the order that does not belong to the current user.");
         }
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
+        redisUtils.removeItem(paymentKey);
         return ResponseMapper.mapToOrderSummaryResponse(payment, order, cartItems, cart.getId());
     }
 }
