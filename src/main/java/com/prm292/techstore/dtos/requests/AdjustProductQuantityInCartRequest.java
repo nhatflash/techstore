@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdjustProductQuantityInCartRequest {
-    @NotNull(message = "Product ID is required")
-    private int productId;
+    @NotNull(message = "Cart item id is required")
+    private int cartItemId;
 
     @Min(value = -100, message = "Cart adjustment quantity must not be lower than -100")
     @Max(value = 100, message = "Cart adjustment quantity must not be greater than 100")
-    @NotNull(message = "Product quantity is required")
+    @NotNull(message = "Cart item quantity is required")
     private int quantity;
 }

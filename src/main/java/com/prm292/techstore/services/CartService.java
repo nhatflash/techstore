@@ -91,11 +91,12 @@ public class CartService {
     public CartResponse HandleAdjustProductQuantityInCart(String username, AdjustProductQuantityInCartRequest request) {
         User user = userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(() -> new NotFoundException("User not found."));
         Cart userCart = cartRepository.findFirstByUserIdAndStatus(user.getId(), CartStatus.Processing).orElseThrow(() -> new NotFoundException("Processing cart not found."));
-        CartItem cartItem = cartItemRepository.findFirstByCartIdAndProductId(userCart.getId(), request.getProductId()).orElseThrow(() -> new NotFoundException("Cart item not found."));
+        CartItem cartItem = cartItemRepository.findById(request.getCartItemId()).orElseThrow(() -> new NotFoundException("Cart item not found."));
 
-        if (cartItem.getQuantity() == request.getQuantity()) {
-            throw new BadRequestException("Product quantity is not changed.");
+        if (!Objects.equals(cartItem.getCart().getId(), userCart.getId())) {
+            throw new BadRequestException("Cart item does not belong to the user.");
         }
+
         if (request.getQuantity() < 0 && request.getQuantity() + cartItem.getQuantity() < 0) {
             throw new BadRequestException("The requested quantity of the cart item to subtract is higher that the current item quantity in cart");
         }
@@ -118,7 +119,7 @@ public class CartService {
         User user = userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(() -> new NotFoundException("User not found."));
         Cart userCart = cartRepository.findFirstByUserIdAndStatus(user.getId(), CartStatus.Processing).orElseThrow(() -> new NotFoundException("Processing cart not found."));
 
-        CartItem cartItem = cartItemRepository.findFirstById(cartItemId).orElseThrow(() -> new NotFoundException("Cart item not found."));
+        CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(() -> new NotFoundException("Cart item not found."));
         if (!Objects.equals(cartItem.getCart().getId(), userCart.getId())) {
             throw new BadRequestException("Cart item does not belong to the user.");
         }

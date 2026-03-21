@@ -10,9 +10,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Integer> {
 
     Optional<CartItem> findFirstByCartIdAndProductId(Integer cartId, Integer productId);
 
-    boolean existsByCartIdAndProductId(Integer cartId, Integer productId);
-
     List<CartItem> findByCartId(Integer cartId);
 
-    Optional<CartItem> findFirstById(Integer id);
 }
