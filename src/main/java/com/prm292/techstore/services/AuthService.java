@@ -7,11 +7,15 @@ import com.prm292.techstore.exceptions.BadRequestException;
 import com.prm292.techstore.exceptions.NotFoundException;
 import com.prm292.techstore.exceptions.UnauthorizedAccessException;
 import com.prm292.techstore.common.mappers.ResponseMapper;
+import com.prm292.techstore.models.Cart;
 import com.prm292.techstore.models.User;
 import com.prm292.techstore.repositories.UserRepository;
 import com.prm292.techstore.userdetails.CustomUserDetails;
 import com.prm292.techstore.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
+
+import java.math.BigDecimal;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -62,8 +66,8 @@ public class AuthService {
         user.setFullName(fullName);
         user.setAddress(address);
         user.setRole(UserRole.Customer);
-        userRepository.save(user);
-        return ResponseMapper.mapToUserResponse(user);
+        var newUser = userRepository.save(user);
+        return ResponseMapper.mapToUserResponse(newUser);
     }
 
 

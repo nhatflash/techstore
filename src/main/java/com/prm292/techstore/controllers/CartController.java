@@ -2,6 +2,7 @@ package com.prm292.techstore.controllers;
 
 
 import com.prm292.techstore.apis.ApiResponse;
+import com.prm292.techstore.dtos.requests.AdjustProductQuantityInCartRequest;
 import com.prm292.techstore.dtos.requests.ManageProductToCartRequest;
 import com.prm292.techstore.dtos.responses.CartResponse;
 import com.prm292.techstore.exceptions.UnauthorizedAccessException;
@@ -30,7 +31,7 @@ public class CartController {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");
         }
-        var response = cartService.HandleAddProductToCart(userDetails.getUsername(), request);
+        var response = cartService.handleAddProductToCart(userDetails.getUsername(), request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -40,13 +41,13 @@ public class CartController {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");
         }
-        var response = cartService.HandleGetUserCart(userDetails.getUsername());
+        var response = cartService.handleGetUserCart(userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.created(response));
     }
 
     @PatchMapping
     @PreAuthorize("hasRole('Customer')")
-    public ResponseEntity<ApiResponse<CartResponse>> AdjustProductQuantityInCart(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid ManageProductToCartRequest request) {
+    public ResponseEntity<ApiResponse<CartResponse>> AdjustProductQuantityInCart(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody @Valid AdjustProductQuantityInCartRequest request) {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");
         }
@@ -60,7 +61,7 @@ public class CartController {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");
         }
-        var response = cartService.HandleRemoveItemFromCart(userDetails.getUsername(), cartItemId);
+        var response = cartService.handleRemoveItemFromCart(userDetails.getUsername(), cartItemId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -71,7 +72,7 @@ public class CartController {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");
         }
-        var response = cartService.HandleRemoveEntireCart(userDetails.getUsername());
+        var response = cartService.handleRemoveEntireCart(userDetails.getUsername());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

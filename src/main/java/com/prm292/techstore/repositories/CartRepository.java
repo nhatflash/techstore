@@ -12,5 +12,4 @@ public interface CartRepository extends JpaRepository<Cart, Integer> {
 
     Optional<Cart> findFirstByUserIdAndStatus(Integer userId, String status);
 
-
 }

@@ -3,6 +3,7 @@ package com.prm292.techstore.services;
 
 import com.prm292.techstore.constants.CartStatus;
 import com.prm292.techstore.common.mappers.ResponseMapper;
+import com.prm292.techstore.dtos.requests.AdjustProductQuantityInCartRequest;
 import com.prm292.techstore.dtos.requests.ManageProductToCartRequest;
 import com.prm292.techstore.dtos.responses.CartResponse;
 import com.prm292.techstore.exceptions.BadRequestException;
@@ -36,47 +37,49 @@ public class CartService {
 
 
     @Transactional
-    public CartResponse HandleAddProductToCart(String username, ManageProductToCartRequest request) {
+    public CartResponse handleAddProductToCart(String username, ManageProductToCartRequest request) {
         User user = userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(() -> new NotFoundException("User not found."));
-        Cart userProcessingCart = cartRepository.findFirstByUserIdAndStatus(user.getId(), CartStatus.Processing).orElse(null);
+        Cart processingCart = cartRepository.findFirstByUserIdAndStatus(user.getId(), CartStatus.Processing).orElse(null);
 
-        if (userProcessingCart == null) {
-            userProcessingCart = new Cart();
-            userProcessingCart.setUser(user);
-            userProcessingCart.setTotalPrice(new BigDecimal("0.00"));
-            userProcessingCart.setStatus(CartStatus.Processing);
-            cartRepository.saveAndFlush(userProcessingCart);
+        if (processingCart == null) {
+            processingCart = new Cart();
+            processingCart.setUser(user);
+            processingCart.setTotalPrice(new BigDecimal("0.00"));
+            processingCart.setStatus(CartStatus.Processing);
+            cartRepository.saveAndFlush(processingCart);
         }
-        BigDecimal cartTotalPrice = userProcessingCart.getTotalPrice();
+        BigDecimal cartItemTotalPrice;
         Product requestedProduct = productRepository.findFirstById(request.getProductId()).orElseThrow(() -> new NotFoundException("Product not found."));
-        CartItem cartItem = cartItemRepository.findFirstByCartIdAndProductId(userProcessingCart.getId(), requestedProduct.getId()).orElse(null);
+
+        CartItem cartItem = cartItemRepository.findFirstByCartIdAndProductId(processingCart.getId(), requestedProduct.getId()).orElse(null);
 
         if (cartItem == null) {
             cartItem = new CartItem();
-            cartItem.setCart(userProcessingCart);
+            cartItem.setCart(processingCart);
             cartItem.setProduct(requestedProduct);
             cartItem.setQuantity(request.getQuantity());
             cartItem.setPrice(requestedProduct.getPrice());
-            cartTotalPrice = cartTotalPrice.add(requestedProduct.getPrice());
+            cartItemTotalPrice = getCartItemTotalPrice(requestedProduct.getPrice(), request.getQuantity());
         } else {
-            cartTotalPrice = cartTotalPrice.subtract(requestedProduct.getPrice().multiply(new BigDecimal(cartItem.getQuantity())));
-            int updatedQuantity = cartItem.getQuantity() + request.getQuantity();
-            BigDecimal updatedPrice = requestedProduct.getPrice().multiply(new BigDecimal(updatedQuantity));
+            cartItemTotalPrice = getCartItemTotalPrice(requestedProduct.getPrice(), cartItem.getQuantity());
+            var newCartItemTotalPrice = getCartItemTotalPrice(requestedProduct.getPrice(), request.getQuantity());
+            var updatedQuantity = cartItem.getQuantity() + request.getQuantity();
+            cartItemTotalPrice = cartItemTotalPrice.add(newCartItemTotalPrice);
             cartItem.setQuantity(updatedQuantity);
-            cartTotalPrice = cartTotalPrice.add(updatedPrice);
         }
-        userProcessingCart.setTotalPrice(cartTotalPrice);
-        cartRepository.save(userProcessingCart);
+        var total = processingCart.getTotalPrice().add(cartItemTotalPrice);
+        processingCart.setTotalPrice(total);
         cartItemRepository.save(cartItem);
+        cartRepository.save(processingCart);
 
-        List<CartItem> cartItems = cartItemRepository.findByCartId(userProcessingCart.getId());
+        List<CartItem> cartItems = cartItemRepository.findByCartId(processingCart.getId());
         notificationService.updateCartBadge(username, cartItems.size());
 
-        return ResponseMapper.mapToCartResponse(userProcessingCart, cartItems);
+        return ResponseMapper.mapToCartResponse(processingCart, cartItems);
     }
 
     @Transactional(readOnly = true)
-    public CartResponse HandleGetUserCart(String username) {
+    public CartResponse handleGetUserCart(String username) {
         User user = userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(() -> new NotFoundException("User not found."));
         Cart userCart = cartRepository.findFirstByUserIdAndStatus(user.getId(), CartStatus.Processing).orElseThrow(() -> new NotFoundException("Processing cart not found."));
         List<CartItem> cartItems = cartItemRepository.findByCartId(userCart.getId());
@@ -85,33 +88,33 @@ public class CartService {
 
 
     @Transactional
-    public CartResponse HandleAdjustProductQuantityInCart(String username, ManageProductToCartRequest request) {
+    public CartResponse HandleAdjustProductQuantityInCart(String username, AdjustProductQuantityInCartRequest request) {
         User user = userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(() -> new NotFoundException("User not found."));
         Cart userCart = cartRepository.findFirstByUserIdAndStatus(user.getId(), CartStatus.Processing).orElseThrow(() -> new NotFoundException("Processing cart not found."));
-        Product product = productRepository.findFirstById(request.getProductId()).orElseThrow(() -> new NotFoundException("Product not found."));
         CartItem cartItem = cartItemRepository.findFirstByCartIdAndProductId(userCart.getId(), request.getProductId()).orElseThrow(() -> new NotFoundException("Cart item not found."));
 
         if (cartItem.getQuantity() == request.getQuantity()) {
             throw new BadRequestException("Product quantity is not changed.");
         }
-
-        BigDecimal oldItemPrice = product.getPrice().multiply(new BigDecimal(cartItem.getQuantity()));
-        BigDecimal newItemPrice = product.getPrice().multiply(new BigDecimal(request.getQuantity()));
-        BigDecimal newCartTotalPrice = userCart.getTotalPrice().subtract(oldItemPrice).add(newItemPrice);
-        cartItem.setQuantity(request.getQuantity());
-        userCart.setTotalPrice(newCartTotalPrice);
-
+        if (request.getQuantity() < 0 && request.getQuantity() + cartItem.getQuantity() < 0) {
+            throw new BadRequestException("The requested quantity of the cart item to subtract is higher that the current item quantity in cart");
+        }
+        var newQuantity = cartItem.getQuantity() + request.getQuantity();
+        cartItem.setQuantity(newQuantity);
         cartItemRepository.save(cartItem);
+
+        var cartItems = cartItemRepository.findByCartId(userCart.getId());
+        var total = cartItems.stream().map(item -> item.getPrice().multiply(new BigDecimal(item.getQuantity()))).reduce(BigDecimal.ZERO, BigDecimal::add);
+        userCart.setTotalPrice(total);
         cartRepository.save(userCart);
 
-        List<CartItem> cartItems = cartItemRepository.findByCartId(userCart.getId());
         notificationService.updateCartBadge(username, cartItems.size());
 
         return ResponseMapper.mapToCartResponse(userCart, cartItems);
     }
 
     @Transactional
-    public CartResponse HandleRemoveItemFromCart(String username, int cartItemId) {
+    public CartResponse handleRemoveItemFromCart(String username, int cartItemId) {
         User user = userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(() -> new NotFoundException("User not found."));
         Cart userCart = cartRepository.findFirstByUserIdAndStatus(user.getId(), CartStatus.Processing).orElseThrow(() -> new NotFoundException("Processing cart not found."));
 
@@ -132,7 +135,7 @@ public class CartService {
 
 
     @Transactional
-    public CartResponse HandleRemoveEntireCart(String username) {
+    public CartResponse handleRemoveEntireCart(String username) {
         User user = userRepository.findFirstByUsernameIgnoreCase(username).orElseThrow(() -> new NotFoundException("User not found."));
         Cart userCart = cartRepository.findFirstByUserIdAndStatus(user.getId(), CartStatus.Processing).orElseThrow(() -> new NotFoundException("Processing cart not found."));
         List<CartItem> cartItems = cartItemRepository.findByCartId(userCart.getId());
@@ -142,5 +145,9 @@ public class CartService {
         notificationService.updateCartBadge(username, 0);
 
         return ResponseMapper.mapToCartResponse(userCart, new ArrayList<>());
+    }
+
+    private BigDecimal getCartItemTotalPrice(BigDecimal productPrice, int quantity) {
+        return productPrice.multiply(new BigDecimal(quantity));
     }
 }
