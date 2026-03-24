@@ -2,6 +2,7 @@ package com.prm292.techstore.services;
 
 import com.prm292.techstore.models.DeviceToken;
 import com.prm292.techstore.repositories.DeviceTokenRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class DeviceTokenService {
         deviceTokenRepository.save(deviceToken);
     }
 
+    @Transactional
     public void removeToken(String username, String token) {
         deviceTokenRepository.deleteByUsernameAndToken(username, token);
     }

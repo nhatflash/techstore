@@ -5,6 +5,7 @@ import com.prm292.techstore.dtos.requests.RegisterDeviceTokenRequest;
 import com.prm292.techstore.exceptions.UnauthorizedAccessException;
 import com.prm292.techstore.services.DeviceTokenService;
 import com.prm292.techstore.userdetails.CustomUserDetails;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,6 @@ public class DeviceTokenController {
     private final DeviceTokenService deviceTokenService;
 
     @PostMapping
-    @PreAuthorize("hasRole('Customer')")
     public ResponseEntity<ApiResponse<Void>> RegisterToken(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid RegisterDeviceTokenRequest request) {
@@ -33,15 +33,13 @@ public class DeviceTokenController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    @DeleteMapping
-    @PreAuthorize("hasRole('Customer')")
+    @DeleteMapping("/{token}")
     public ResponseEntity<ApiResponse<Void>> RemoveToken(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody @Valid RegisterDeviceTokenRequest request) {
+            @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String token) {
         if (userDetails == null) {
             throw new UnauthorizedAccessException("User is not logged in.");
         }
-        deviceTokenService.removeToken(userDetails.getUsername(), request.getToken());
+        deviceTokenService.removeToken(userDetails.getUsername(), token);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

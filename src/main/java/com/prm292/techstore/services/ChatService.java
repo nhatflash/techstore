@@ -9,9 +9,11 @@ import com.prm292.techstore.exceptions.NotFoundException;
 import com.prm292.techstore.exceptions.UnauthorizedAccessException;
 import com.prm292.techstore.models.ChatMessage;
 import com.prm292.techstore.models.ChatRoom;
+import com.prm292.techstore.models.DeviceToken;
 import com.prm292.techstore.models.User;
 import com.prm292.techstore.repositories.ChatMessageRepository;
 import com.prm292.techstore.repositories.ChatRoomRepository;
+import com.prm292.techstore.repositories.DeviceTokenRepository;
 import com.prm292.techstore.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,8 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final DeviceTokenRepository deviceTokenRepository;
 
     @Transactional
     public ChatRoom getOrCreateRoom(Integer clientId) {
@@ -71,6 +75,15 @@ public class ChatService {
         chatMessage.setIsRead(false);
 
         chatMessageRepository.save(chatMessage);
+
+        // if admin or staff send messages, send notification to customer's devices
+        if (UserRole.Admin.equals(sender.getRole()) || UserRole.Staff.equals(sender.getRole())) {
+            var customer = room.getClient();
+            var deviceTokens = deviceTokenRepository.findAllByUsername(customer.getUsername());
+            var tokens = deviceTokens.stream().map(DeviceToken::getToken).toList();
+            notificationService.sendChatNotification(tokens, customer.getUsername(), sender.getUsername(), message, roomId);
+        }
+
         return toMessageResponse(chatMessage);
     }
 

@@ -1,14 +1,10 @@
 package com.prm292.techstore.services;
 
-import com.google.firebase.messaging.AndroidConfig;
-import com.google.firebase.messaging.AndroidNotification;
-import com.google.firebase.messaging.ApnsConfig;
-import com.google.firebase.messaging.Aps;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.*;
 import com.prm292.techstore.models.DeviceToken;
 import com.prm292.techstore.repositories.DeviceTokenRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,5 +41,25 @@ public class NotificationService {
                 .build();
 
         FirebaseMessaging.getInstance().sendAsync(message);
+    }
+
+    @Async
+    public void sendChatNotification(List<String> fcmTokens, String receiverName, String senderName, String messageBody, int roomId) {
+        if (fcmTokens.isEmpty()) return;
+        MulticastMessage message = MulticastMessage.builder()
+                .addAllTokens(fcmTokens)
+                .putData("title", "Tin nhắn từ " + senderName)
+                .putData("body", messageBody)
+                .putData("roomId", String.valueOf(roomId))
+                .putData("clientName", receiverName)
+                .build();
+        try {
+            var response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
+            if (response.getFailureCount() > 0) {
+                System.out.println("Failed to send message to " + response.getFailureCount() + " tokens");
+            }
+        } catch (Exception e) {
+            System.out.println("Error sending message: " + e.getMessage());
+        }
     }
 }
