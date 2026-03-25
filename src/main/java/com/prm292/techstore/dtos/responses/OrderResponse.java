@@ -6,6 +6,8 @@ public record OrderResponse(
         Integer id,
         Integer cartId,
         String paymentMethod,
+        String billingFullName,
+        String billingPhone,
         String billingAddress,
         String orderStatus,
         Instant orderDate) {

@@ -48,8 +48,8 @@ public class NotificationService {
         if (fcmTokens.isEmpty()) return;
         MulticastMessage message = MulticastMessage.builder()
                 .addAllTokens(fcmTokens)
-                .putData("title", "Tin nhắn từ " + senderName)
-                .putData("body", messageBody)
+                .putData("title", "TechStore")
+                .putData("body", "Tin nhắn từ " + senderName + ": " + messageBody)
                 .putData("roomId", String.valueOf(roomId))
                 .putData("clientName", receiverName)
                 .build();

@@ -65,6 +65,8 @@ public class ResponseMapper {
                 order.getId(),
                 cartId,
                 order.getPaymentMethod(),
+                order.getBillingFullName(),
+                order.getBillingPhone(),
                 order.getBillingAddress(),
                 order.getOrderStatus(),
                 order.getOrderDate()
